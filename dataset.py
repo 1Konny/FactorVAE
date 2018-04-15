@@ -45,6 +45,10 @@ def return_data(args):
         root = Path(dset_dir).joinpath('CelebA')
         train_kwargs = {'root':root, 'transform':transform}
         dset = CustomImageFolder
+    elif name.lower() == '3dchairs':
+        root = Path(dset_dir).joinpath('3DChairs')
+        train_kwargs = {'root':root, 'transform':transform}
+        dset = CustomImageFolder
     else:
         raise NotImplementedError
 

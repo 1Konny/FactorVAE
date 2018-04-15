@@ -142,7 +142,7 @@ class Solver(object):
 
 
 
-                if self.global_iter%2000 == 0:
+                if self.global_iter%1000 == 0:
                     soft_D_z = F.sigmoid(D_z)
                     soft_D_z_perm = F.sigmoid(D_z_perm)
                     disc_acc = ((soft_D_z >= 0.5).sum() + (soft_D_z_perm < 0.5).sum()).float()
@@ -154,7 +154,7 @@ class Solver(object):
                                                     soft_D_z.mean().data[0],
                                                     soft_D_z_perm.mean().data[0]]))
 
-                if self.global_iter%10000 == 0:
+                if self.global_iter%5000 == 0:
                     self.save_checkpoint()
                     self.visualize(dict(image=[x_vae, x_recon], curve=curve_data))
                     print('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
