@@ -1,10 +1,12 @@
 """dataset.py"""
 
+import random
 from pathlib import Path
 
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
+
 
 def is_power_of_2(num):
     return ((num & (num - 1)) == 0) and num != 0
@@ -13,13 +15,12 @@ def is_power_of_2(num):
 class CustomImageFolder(ImageFolder):
     def __init__(self, root, transform=None):
         super(CustomImageFolder, self).__init__(root, transform)
-        import random
-        self.index2 = list(range(len(self)))
-        random.shuffle(self.index2)
 
     def __getitem__(self, index1):
+        index2 = random.choice(range(len(self)))
+
         path1 = self.imgs[index1][0]
-        path2 = self.imgs[self.index2[index1]][0]
+        path2 = self.imgs[index2][0]
         img1 = self.loader(path1)
         img2 = self.loader(path2)
         if self.transform is not None:
