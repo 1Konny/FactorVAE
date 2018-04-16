@@ -26,7 +26,7 @@ def main(args):
     if args.train:
         net.train()
     else:
-        net.show_factorization()
+        net.traverse()
 
 
 if __name__ == "__main__":

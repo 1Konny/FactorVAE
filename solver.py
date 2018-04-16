@@ -109,6 +109,7 @@ class Solver(object):
         decoder = self.VAE.decode
         encoder = self.VAE.encode
         interpolation = torch.arange(-6, 6.1, 2)
+        viz = visdom.Visdom(env=self.viz_name+'/traverse', port=self.viz_port)
         for i in range(num_sample):
             if random:
                 img = iter(self.data_loader).next()[1]
@@ -126,7 +127,7 @@ class Solver(object):
                     sample = F.sigmoid(decoder(z))
                     samples.append(sample)
             samples = torch.cat(samples, dim=0).data.cpu()
-            self.viz.images(samples, opts=dict(title='sample:'+str(i)), nrow=len(interpolation))
+            viz.images(samples, opts=dict(title='sample:'+str(i)), nrow=len(interpolation))
 
     def train(self):
         self.net_mode(train=True)
