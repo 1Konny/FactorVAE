@@ -1,5 +1,5 @@
 # FactorVAE
-Pytorch implementation of FactorVAE proposed in Disentangling by Factorising([http://arxiv.org/abs/1802.05983])
+Pytorch implementation of FactorVAE proposed in Disentangling by Factorising, Kim et al.([http://arxiv.org/abs/1802.05983])
 <br>
 
 ### Dependencies
@@ -9,6 +9,10 @@ pytorch 0.3.1.post2
 visdom
 ```
 <br>
+
+### Datasets
+1. 3D Chairs Dataset([Aubry et al.])([click to download])
+2. CelebA Dataset([website])
 
 ### Usage
 initialize visdom
@@ -32,8 +36,8 @@ localhost:55558
 ```
 <br>
 
-### Results - 3D Chairs Dataset([Aubry et al.])
-each row represent each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
+### Results - 3D Chairs Dataset
+each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 
 #### Latent Space Traverse 1(representation from true image 1)
 ![3dchairs_traverse_img1](misc/3dchairs_traverse_img1.jpg)
@@ -52,3 +56,4 @@ each row represent each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 
 [http://arxiv.org/abs/1802.05983]: http://arxiv.org/abs/1802.05983
 [Aubry et al.]: http://www.di.ens.fr/~josef/publications/aubry14.pdf
+[click to download]: https://www.di.ens.fr/willow/research/seeing3Dchairs/data/rendered_chairs.tar
