@@ -56,7 +56,7 @@ check training process on the visdom server
 ```
 localhost:55558
 ```
-after training, you can see traverse results by reusing ```viz_name```
+after training, you can see traverse results(see below) using ```--viz_name```
 ```
 python main.py --train False --viz_name run1
 ```
