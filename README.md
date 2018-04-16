@@ -50,12 +50,17 @@ sh run_3dchairs.sh
 or you can run your own experiments by setting parameters manually
 ```
 e.g.
-python main.py --dataset celeba --gamma 6.4 --lr_VAE 1e-4 --lr_D 5e-5 --z_dim 10 ...
+python main.py --viz_name run1 --dataset celeba --gamma 6.4 --lr_VAE 1e-4 --lr_D 5e-5 --z_dim 10 ...
 ```
 check training process on the visdom server
 ```
 localhost:55558
 ```
+after training, you can see traverse results by reusing ```viz_name```
+```
+python main.py --train False --viz_name run1
+```
+
 <br>
 
 ### Results - 3D Chairs Dataset
