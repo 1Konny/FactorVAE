@@ -71,11 +71,10 @@ class FactorVAE(nn.Module):
             for m in self._modules[block]:
                 kaiming_init(m)
 
-    # To Do : Check if ops are performed correctly
     def reparametrize(self, mu, logvar):
-        std = logvar.mul(0.5).exp()
+        std = logvar.mul(0.5).exp_()
         eps = Variable(std.data.new(std.size()).normal_())
-        return eps.mul(std).add(mu)
+        return eps.mul(std).add_(mu)
 
     def forward(self, x, no_dec=False):
         stats = self.encode(x)
