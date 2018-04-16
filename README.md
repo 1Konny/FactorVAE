@@ -14,7 +14,7 @@ visdom
 1. 3D Chairs Dataset([Aubry et al.])([click to download])
 2. CelebA Dataset([website])
 
-and make sure you follow desired dataset directory tree supported by Pytorch ImageFolder class
+and make sure you follow desired dataset directory tree supported by Pytorch ImageFolder Class.
 for example,
 ```
 .
