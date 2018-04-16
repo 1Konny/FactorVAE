@@ -14,6 +14,27 @@ visdom
 1. 3D Chairs Dataset([Aubry et al.])([click to download])
 2. CelebA Dataset([website])
 
+and make sure you follow desired dataset directory tree supported by Pytorch ImageFolder class
+for example,
+```
+.
+└── data
+    └── CelebA
+        └── img_align_celeba
+            ├── 000001.jpg
+            ├── 000002.jpg
+            ├── ...
+            └── 202599.jpg
+    ├── 3DChairs
+        └── rendered_chairs1
+            ├── xxx.png
+            ├── ...
+       └── rendered_chairs2
+            ├── xxx.png
+            ├── ...
+    └── ...
+```
+
 ### Usage
 initialize visdom
 ```
@@ -57,3 +78,4 @@ each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 [http://arxiv.org/abs/1802.05983]: http://arxiv.org/abs/1802.05983
 [Aubry et al.]: http://www.di.ens.fr/~josef/publications/aubry14.pdf
 [click to download]: https://www.di.ens.fr/willow/research/seeing3Dchairs/data/rendered_chairs.tar
+[website]: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
