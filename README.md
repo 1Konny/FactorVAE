@@ -33,6 +33,8 @@ localhost:55558
 <br>
 
 ### Results - 3D Chairs Dataset([Aubry et al.])
+each row represent each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
+
 #### Latent Space Traverse 1(representation from true image 1)
 ![3dchairs_traverse_img1](misc/3dchairs_traverse_img1.jpg)
 #### Latent Space Traverse 2(representation from true image 2)
@@ -45,7 +47,8 @@ localhost:55558
 <br>
 
 ### Reference
-1. Disentangling by Factorising, Kim et al.
+1. Disentangling by Factorising, Kim et al.([http://arxiv.org/abs/1802.05983])
+
 
 [http://arxiv.org/abs/1802.05983]: http://arxiv.org/abs/1802.05983
 [Aubry et al.]: http://www.di.ens.fr/~josef/publications/aubry14.pdf
