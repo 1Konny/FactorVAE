@@ -106,26 +106,27 @@ class Solver(object):
         self.image_size = args.image_size
         self.data_loader = return_data(args)
 
-    # get starting point from z|x
     def traverse(self):
         decoder = self.VAE.decode
         encoder = self.VAE.encode
-        interpolation = torch.arange(-6, 6.1, 2)
+        interpolation = torch.arange(-6, 6.1, 1)
         viz = visdom.Visdom(env=self.viz_name+'/traverse', port=self.viz_port)
 
-        fixed_img, random_img = self.data_loader.dataset.__getitem__(1)
+        fixed_idx = 0
+
+        fixed_img, random_img = self.data_loader.dataset.__getitem__(fixed_idx)
         fixed_img = Variable(cuda(fixed_img, self.use_cuda), volatile=True).unsqueeze(0)
+        fixed_img_z = encoder(fixed_img)[:, :self.z_dim]
+
         random_img = Variable(cuda(random_img, self.use_cuda), volatile=True).unsqueeze(0)
+        random_img_z = encoder(random_img)[:, :self.z_dim]
+
         zero_z = Variable(cuda(torch.zeros(1, self.z_dim, 1, 1), self.use_cuda), volatile=True)
         random_z = Variable(cuda(torch.rand(1, self.z_dim, 1, 1), self.use_cuda), volatile=True)
 
-        src = [fixed_img, random_img, zero_z, random_z]
-        for i, vector in enumerate(src):
-            if i < 2:
-                z_ori = encoder(vector)[:, :self.z_dim]
-            else:
-                z_ori = vector
-
+        Z = {'fixed_img':fixed_img_z, 'random_img':random_img_z, 'random_z':random_z, 'zero_z':zero_z}
+        for key in Z.keys():
+            z_ori = Z[key]
             samples = []
             for row in range(self.z_dim):
                 z = z_ori.clone()
@@ -134,15 +135,7 @@ class Solver(object):
                     sample = F.sigmoid(decoder(z))
                     samples.append(sample)
             samples = torch.cat(samples, dim=0).data.cpu()
-            if i==0:
-                title = 'traverse representation from fixed image'
-            elif i==1:
-                title = 'traverse representation random image'
-            elif i==2:
-                title = 'traverse zero representation vector'
-            elif i==3:
-                title = 'traverse random gaussian representation vector'
-            title += '(iter:{})'.format(self.global_iter)
+            title = '{}_row_traverse(iter:{})'.format(key, self.global_iter)
             viz.images(samples, opts=dict(title=title), nrow=len(interpolation))
 
     def train(self):
@@ -205,6 +198,9 @@ class Solver(object):
                     print('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
                         self.global_iter, vae_recon_loss.data[0], vae_kld.data[0], vae_tc_loss.data[0], D_tc_loss.data[0]))
                     curve_data = []
+
+                if self.global_iter%100000 == 0:
+                    self.traverse()
 
                 if self.global_iter >= self.max_iter:
                     out = True
