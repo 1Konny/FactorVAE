@@ -75,6 +75,14 @@ each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 #### Latent Space Traverse 4(representation from normal distribution)
 ![3dchairs_traverse_normal_dist](misc/3dchairs_traverse_normal_dist.jpg)
 
+### Results - CelebA Dataset
+each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
+
+#### Latent Space Traverse 1(representation from zero vector)
+![celeba_zero_vector](misc/traverse_from_zero_vector_celeba.jpg)
+#### Latent Space Traverse 2(representation from random normal vector)
+![celeba_normal_vector](misc/traverse_from_random_normal_vector_celeba.jpg)
+
 <br>
 
 ### Reference
