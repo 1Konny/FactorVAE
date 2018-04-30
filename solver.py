@@ -23,12 +23,7 @@ def original_vae_loss(x, x_recon, mu, logvar):
         kl_divergence = 0
     else:
         recon_loss = F.binary_cross_entropy_with_logits(x_recon, x, size_average=False).div(batch_size)
-        # kld which one is correct? from the equation in most of papers,
-        # I think the first one is correct but official pytorch code uses the second one.
-
         kl_divergence = -0.5*(1 + logvar - mu**2 - logvar.exp()).sum(1).mean()
-        #kl_divergence = -0.5*(1 + logvar - mu**2 - logvar.exp()).sum()
-        #dimension_wise_kl_divergence = -0.5*(1 + logvar - mu**2 - logvar.exp()).mean(0)
 
     return recon_loss, kl_divergence
 
@@ -158,9 +153,10 @@ class Solver(object):
                 vae_recon_loss, vae_kld = original_vae_loss(x_vae, x_recon, mu, logvar)
 
                 D_z = self.D(z)
-                vae_tc_1 = F.binary_cross_entropy_with_logits(D_z, ones, -self.gamma)
-                vae_tc_2 = F.binary_cross_entropy_with_logits(D_z, zeros, self.gamma)
-                vae_tc_loss = vae_tc_1 + vae_tc_2
+                #vae_tc_1 = F.binary_cross_entropy_with_logits(D_z, ones, -self.gamma)
+                #vae_tc_2 = F.binary_cross_entropy_with_logits(D_z, zeros, self.gamma)
+                #vae_tc_loss = vae_tc_1 + vae_tc_2
+                vae_tc_loss = D_z.mean()*self.gamma
 
                 vae_loss = vae_recon_loss + vae_kld + vae_tc_loss
 
