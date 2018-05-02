@@ -12,7 +12,7 @@ from torchvision.utils import make_grid
 from torchvision import transforms
 
 from utils import cuda
-from model import FactorVAE, Discriminator
+from model import FactorVAE_2D, FactorVAE_3D, Discriminator
 from dataset import return_data
 
 
@@ -64,7 +64,10 @@ class Solver(object):
         self.beta1_D = args.beta1_D
         self.beta2_D = args.beta2_D
 
-        self.VAE = cuda(FactorVAE(self.z_dim), self.use_cuda)
+        if args.dataset == 'dsprites':
+            self.VAE = cuda(FactorVAE_2D(self.z_dim), self.use_cuda)
+        else:
+            self.VAE = cuda(FactorVAE_3D(self.z_dim), self.use_cuda)
         self.optim_VAE = optim.Adam(self.VAE.parameters(), lr=self.lr_VAE,
                                     betas=(self.beta1_VAE, self.beta2_VAE))
 

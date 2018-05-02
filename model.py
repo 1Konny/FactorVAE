@@ -35,9 +35,9 @@ class Discriminator(nn.Module):
         return self.net(z).squeeze()
 
 
-class FactorVAE(nn.Module):
+class FactorVAE_3D(nn.Module):
     def __init__(self, z_dim=10):
-        super(FactorVAE, self).__init__()
+        super(FactorVAE_3D, self).__init__()
         self.z_dim = z_dim
         self.encode = nn.Sequential(
             nn.Conv2d(3, 32, 4, 2, 1),
@@ -87,6 +87,56 @@ class FactorVAE(nn.Module):
             return z.squeeze()
         else:
             x_recon = self.decode(z)
+            return x_recon, mu, logvar, z.squeeze()
+
+
+class View(nn.Module):
+    def __init__(self, size):
+        super(View, self).__init__()
+        self.size = size
+
+    def forward(self, tensor):
+        return tensor.view(self.size)
+
+
+class FactorVAE_2D(FactorVAE_3D):
+    def __init__(self, z_dim=10):
+        super(FactorVAE_2D, self).__init__()
+        self.z_dim = z_dim
+
+        # Views are applied just for the consistency in shape with CONV-based models
+        self.encode = nn.Sequential(
+            View((-1, 4096)),
+            nn.Linear(4096, 1200),
+            nn.ReLU(True),
+            nn.Linear(1200, 1200),
+            nn.ReLU(True),
+            nn.Linear(1200, 2*self.z_dim),
+            View((-1, 2*self.z_dim, 1, 1)),
+        )
+        self.decode = nn.Sequential(
+            View((-1, self.z_dim)),
+            nn.Linear(self.z_dim, 1200),
+            nn.Tanh(),
+            nn.Linear(1200, 1200),
+            nn.Tanh(),
+            nn.Linear(1200, 1200),
+            nn.Tanh(),
+            nn.Linear(1200, 4096),
+            View((-1, 1, 64, 64)),
+        )
+        self.weight_init()
+
+    def forward(self, x, no_dec=False):
+        stats = self.encode(x)
+        mu = stats[:, :self.z_dim]
+        logvar = stats[:, self.z_dim:]
+        z = self.reparametrize(mu, logvar)
+
+        if no_dec:
+            return z.squeeze()
+        else:
+            x_recon = self.decode(z).view(x.size())
             return x_recon, mu, logvar, z.squeeze()
 
 

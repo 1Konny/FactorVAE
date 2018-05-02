@@ -36,7 +36,6 @@ if __name__ == "__main__":
     parser.add_argument('--cuda', default=True, type=str2bool, help='enable cuda')
     parser.add_argument('--max_iter', default=1e6, type=int, help='maximum training iteration')
     parser.add_argument('--batch_size', default=64, type=int, help='batch size')
-    parser.add_argument('--L', default=64, type=int, help='')
 
     parser.add_argument('--z_dim', default=10, type=int, help='dimension of the representation z')
     parser.add_argument('--gamma', default=6.4, type=float, help='')

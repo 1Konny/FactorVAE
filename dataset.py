@@ -1,9 +1,11 @@
 """dataset.py"""
 
 import random
+import numpy as np
 from pathlib import Path
 
-from torch.utils.data import DataLoader
+import torch
+from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 
@@ -15,9 +17,10 @@ def is_power_of_2(num):
 class CustomImageFolder(ImageFolder):
     def __init__(self, root, transform=None):
         super(CustomImageFolder, self).__init__(root, transform)
+        self.indices = range(len(self))
 
     def __getitem__(self, index1):
-        index2 = random.choice(range(len(self)))
+        index2 = random.choice(self.indices)
 
         path1 = self.imgs[index1][0]
         path2 = self.imgs[index2][0]
@@ -28,6 +31,27 @@ class CustomImageFolder(ImageFolder):
             img2 = self.transform(img2)
 
         return img1, img2
+
+
+class CustomTensorDataset(Dataset):
+    def __init__(self, data_tensor, transform=None):
+        self.data_tensor = data_tensor
+        self.transform = transform
+        self.indices = range(len(self))
+
+    def __getitem__(self, index1):
+        index2 = random.choice(self.indices)
+
+        img1 = self.data_tensor[index1]
+        img2 = self.data_tensor[index2]
+        if self.transform is not None:
+            img1 = self.transform(img1)
+            img2 = self.transform(img2)
+
+        return img1, img2
+
+    def __len__(self):
+        return self.data_tensor.size(0)
 
 
 def return_data(args):
@@ -50,6 +74,17 @@ def return_data(args):
         root = Path(dset_dir).joinpath('3DChairs')
         train_kwargs = {'root':root, 'transform':transform}
         dset = CustomImageFolder
+    elif name.lower() == 'dsprites':
+        root = Path(dset_dir).joinpath('dsprites-dataset/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz')
+        if not root.exists():
+            import subprocess
+            print('Now download dsprites-dataset')
+            subprocess.call(['./download_dsprites.sh'])
+            print('Finished')
+        data = np.load(root, encoding='latin1')
+        data = torch.from_numpy(data['imgs']).unsqueeze(1).float()
+        train_kwargs = {'data_tensor':data}
+        dset = CustomTensorDataset
     else:
         raise NotImplementedError
 
