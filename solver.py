@@ -2,7 +2,6 @@
 
 import time
 import os
-
 import visdom
 import torch
 import torch.optim as optim
@@ -13,7 +12,7 @@ from torchvision import transforms
 
 from utils import cuda, mkdirs, DataGather
 from ops import recon_loss, kl_divergence, permute_dims
-from model import FactorVAE_2D, FactorVAE_3D, Discriminator
+from model import FactorVAE1, FactorVAE2, Discriminator
 from dataset import return_data
 
 
@@ -44,9 +43,9 @@ class Solver(object):
         self.beta2_D = args.beta2_D
 
         if args.dataset == 'dsprites':
-            self.VAE = cuda(FactorVAE_2D(self.z_dim), self.use_cuda)
+            self.VAE = cuda(FactorVAE1(self.z_dim), self.use_cuda)
         else:
-            self.VAE = cuda(FactorVAE_3D(self.z_dim), self.use_cuda)
+            self.VAE = cuda(FactorVAE2(self.z_dim), self.use_cuda)
         self.optim_VAE = optim.Adam(self.VAE.parameters(), lr=self.lr_VAE,
                                     betas=(self.beta1_VAE, self.beta2_VAE))
 
@@ -211,6 +210,7 @@ class Solver(object):
                       Y=kld,
                       env=self.name+'/lines',
                       win=self.win_id['kld'],
+                      update='append',
                       opts=dict(
                         xlabel='iteration',
                         ylabel='kl divergence',))
