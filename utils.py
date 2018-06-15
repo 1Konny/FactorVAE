@@ -1,5 +1,6 @@
 """utils.py"""
 
+import os
 import argparse
 
 import torch
@@ -45,3 +46,8 @@ class One_Hot(nn.Module):
 
     def __repr__(self):
         return self.__class__.__name__ + "({})".format(self.depth)
+
+
+def mkdirs(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
