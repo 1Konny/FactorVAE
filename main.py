@@ -51,8 +51,9 @@ if __name__ == "__main__":
     parser.add_argument('--image_size', default=64, type=int, help='image size. now only (64,64) is supported')
     parser.add_argument('--num_workers', default=2, type=int, help='dataloader num_workers')
 
+    parser.add_argument('--name', default='main', type=str, help='')
+
     parser.add_argument('--viz_on', default=True, type=str2bool, help='enable visdom visualization')
-    parser.add_argument('--viz_name', default='main', type=str, help='visdom env name')
     parser.add_argument('--viz_port', default=8097, type=str, help='visdom port number')
 
     parser.add_argument('--ckpt_dir', default='checkpoints', type=str, help='checkpoint directory')
