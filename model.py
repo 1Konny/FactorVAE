@@ -12,17 +12,17 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.z_dim = z_dim
         self.net = nn.Sequential(
-            nn.Linear(self.z_dim, 1000),
-            nn.LeakyReLU(True),
+            nn.Linear(z_dim, 1000),
+            nn.LeakyReLU(0.2, True),
             nn.Linear(1000, 1000),
-            nn.LeakyReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Linear(1000, 1000),
-            nn.LeakyReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Linear(1000, 1000),
-            nn.LeakyReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Linear(1000, 1000),
-            nn.LeakyReLU(True),
-            nn.Linear(1000, 1),
+            nn.LeakyReLU(0.2, True),
+            nn.Linear(1000, 2),
         )
         self.weight_init()
 
@@ -67,6 +67,16 @@ class FactorVAE1(nn.Module):
             nn.ConvTranspose2d(32, 1, 4, 2, 1),
         )
         self.weight_init()
+
+    def weight_init(self):
+        for block in self._modules:
+            for m in self._modules[block]:
+                kaiming_init(m)
+
+    def reparametrize(self, mu, logvar):
+        std = logvar.mul(0.5).exp_()
+        eps = Variable(std.data.new(std.size()).normal_())
+        return eps.mul(std).add_(mu)
 
     def forward(self, x, no_dec=False):
         stats = self.encode(x)
