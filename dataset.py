@@ -100,19 +100,3 @@ def return_data(args):
     data_loader = train_loader
 
     return data_loader
-
-if __name__ == '__main__':
-    transform = transforms.Compose([
-        transforms.Resize((64, 64)),
-        transforms.ToTensor(),])
-
-    dset = CustomImageFolder('data/CelebA', transform)
-    loader = DataLoader(dset,
-                       batch_size=32,
-                       shuffle=True,
-                       num_workers=1,
-                       pin_memory=False,
-                       drop_last=True)
-
-    images1, image2 = iter(loader).next()
-    import ipdb; ipdb.set_trace()
