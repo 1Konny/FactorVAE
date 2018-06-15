@@ -11,7 +11,7 @@ from torch.autograd import Variable
 from torchvision.utils import make_grid
 from torchvision import transforms
 
-from utils import cuda, mkdirs
+from utils import cuda, mkdirs, DataGather
 from ops import original_vae_loss, permute_dims
 from model import FactorVAE_2D, FactorVAE_3D, Discriminator
 from dataset import return_data
@@ -23,6 +23,7 @@ class Solver(object):
         self.use_cuda = args.cuda and torch.cuda.is_available()
         self.name = args.name
         self.max_iter = args.max_iter
+        self.print_iter = args.print_iter
         self.global_iter = 0
 
         # Data
@@ -58,18 +59,23 @@ class Solver(object):
         # Visdom
         self.viz_on = args.viz_on
         self.win_id = dict(D_z='win_D_z', recon='win_recon', kld='win_kld', acc='win_acc')
+        self.line_gather = DataGather('iter', 'soft_D_z', 'soft_D_z_perm', 'recon', 'kld', 'acc')
+        self.image_gather = DataGather('true', 'recon')
         if self.viz_on:
             self.viz_port = args.viz_port
             self.viz = visdom.Visdom(port=self.viz_port)
+            self.viz_ll_iter = args.viz_ll_iter
+            self.viz_la_iter = args.viz_la_iter
+            self.viz_ra_iter = args.viz_ra_iter
+            self.viz_ta_iter = args.viz_ta_iter
             if not self.viz.win_exists(env=self.name+'/lines', win=self.win_id['D_z']):
                 self.viz_init()
 
         # Checkpoint
         self.ckpt_dir = os.path.join(args.ckpt_dir, args.name)
+        self.ckpt_save_iter = args.ckpt_save_iter
         mkdirs(self.ckpt_dir)
-
-        self.load_ckpt = args.load_ckpt
-        if self.load_ckpt:
+        if args.ckpt_load:
             self.load_checkpoint()
 
     def train(self):
@@ -114,30 +120,37 @@ class Solver(object):
                 D_tc_loss.backward()
                 self.optim_D.step()
 
-                if self.global_iter%1 == 0:
+                if self.global_iter%self.print_iter == 0:
+                    print('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
+                        self.global_iter, vae_recon_loss.data[0], vae_kld.data[0], vae_tc_loss.data[0], D_tc_loss.data[0]))
+
+                if self.global_iter%self.ckpt_save_iter == 0:
+                    self.save_checkpoint(self.global_iter)
+
+                if self.viz_on and (self.global_iter%self.viz_ll_iter == 0):
                     soft_D_z = F.sigmoid(D_z)
                     soft_D_z_perm = F.sigmoid(D_z_perm)
                     disc_acc = ((soft_D_z >= 0.5).sum() + (soft_D_z_perm < 0.5).sum()).float()
                     disc_acc /= 2*self.batch_size
-                    if self.viz_on:
-                        curve_data.append(torch.Tensor([self.global_iter,
-                                                        disc_acc.data[0],
-                                                        vae_recon_loss.data[0],
-                                                        vae_kld.data[0],
-                                                        soft_D_z.mean().data[0],
-                                                        soft_D_z_perm.mean().data[0]]))
+                    self.line_gather.insert(iter=self.global_iter,
+                                            soft_D_z=soft_D_z.mean().data[0],
+                                            soft_D_z_perm=soft_D_z_perm.mean().data[0],
+                                            recon=vae_recon_loss.data[0],
+                                            kld=vae_kld.data[0],
+                                            acc=disc_acc.data[0])
 
-                if self.global_iter%5 == 0:
-                    self.save_checkpoint()
-                    print('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
-                        self.global_iter, vae_recon_loss.data[0], vae_kld.data[0], vae_tc_loss.data[0], D_tc_loss.data[0]))
-                    if self.viz_on:
-                        self.visualize(dict(image=[x_vae, x_recon], curve=curve_data))
-                        curve_data = []
+                if self.viz_on and (self.global_iter%self.viz_la_iter == 0):
+                    self.visualize_line()
+                    self.line_gather.flush()
 
-                if self.global_iter%10 == 0:
-                    if self.viz_on:
-                        self.traverse()
+                if self.viz_on and (self.global_iter%self.viz_ra_iter == 0):
+                    self.image_gather.insert(true=x_vae.data.cpu(),
+                                             recon=F.sigmoid(x_recon).data.cpu())
+                    self.visualize_recon()
+                    self.image_gather.flush()
+
+                if self.viz_on and (self.global_iter%self.viz_ta_iter == 0):
+                    self.visualize_traverse()
 
                 if self.global_iter >= self.max_iter:
                     out = True
@@ -147,24 +160,29 @@ class Solver(object):
             print('[time elapsed] {:.2f}s/epoch'.format(end-start))
         print("[Training Finished]")
 
-    def visualize(self, data):
-        x_vae, x_recon = data['image']
-        curve_data = data['curve']
+    def visualize_recon(self):
+        data = self.image_gather.data
+        true_image = data['true'][0]
+        recon_image = data['recon'][0]
 
-        sample_x = make_grid(x_vae.data.cpu(), normalize=False)
-        sample_x_recon = make_grid(F.sigmoid(x_recon).data.cpu(), normalize=False)
-        samples = torch.stack([sample_x, sample_x_recon], dim=0)
-        self.viz.images(samples, opts=dict(title=str(self.global_iter)))
+        true_image = make_grid(true_image)
+        recon_image = make_grid(recon_image)
+        sample = torch.stack([true_image, recon_image], dim=0)
+        self.viz.images(sample, env=self.name+'/recon_image',
+                        opts=dict(title=str(self.global_iter)))
 
-        curve_data = torch.stack(curve_data, dim=0)
-        curve_x = curve_data[:, 0]
-        curve_acc = curve_data[:, 1]
-        curve_recon = curve_data[:, 2]
-        curve_kld = curve_data[:, 3]
-        curve_D_z = curve_data[:, 4:]
+    def visualize_line(self):
+        data = self.line_gather.data
+        iters = torch.Tensor(data['iter'])
+        recon = torch.Tensor(data['recon'])
+        kld = torch.Tensor(data['kld'])
+        acc = torch.Tensor(data['acc'])
+        soft_D_z = torch.Tensor(data['soft_D_z'])
+        soft_D_z_perm = torch.Tensor(data['soft_D_z_perm'])
+        soft_D_zs = torch.stack([soft_D_z, soft_D_z_perm], -1)
 
-        self.viz.line(X=curve_x,
-                      Y=curve_D_z,
+        self.viz.line(X=iters,
+                      Y=soft_D_zs,
                       env=self.name+'/lines',
                       win=self.win_id['D_z'],
                       update='append',
@@ -172,31 +190,31 @@ class Solver(object):
                         xlabel='iteration',
                         ylabel='D(.)',
                         legend=['D(z)', 'D(z_perm)']))
-        self.viz.line(X=curve_x,
-                      Y=curve_recon,
+        self.viz.line(X=iters,
+                      Y=recon,
                       env=self.name+'/lines',
                       win=self.win_id['recon'],
                       update='append',
                       opts=dict(
                         xlabel='iteration',
                         ylabel='reconstruction loss',))
-        self.viz.line(X=curve_x,
-                      Y=curve_acc,
+        self.viz.line(X=iters,
+                      Y=acc,
                       env=self.name+'/lines',
                       win=self.win_id['acc'],
                       update='append',
                       opts=dict(
                         xlabel='iteration',
                         ylabel='discriminator accuracy',))
-        self.viz.line(X=curve_x,
-                      Y=curve_kld,
+        self.viz.line(X=iters,
+                      Y=kld,
                       env=self.name+'/lines',
                       win=self.win_id['kld'],
                       opts=dict(
                         xlabel='iteration',
                         ylabel='kl divergence',))
 
-    def traverse(self):
+    def visualize_traverse(self):
         decoder = self.VAE.decode
         encoder = self.VAE.encode
         interpolation = torch.arange(-6, 6.1, 1)

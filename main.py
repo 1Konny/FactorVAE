@@ -16,23 +16,17 @@ torch.manual_seed(init_seed)
 torch.cuda.manual_seed(init_seed)
 np.random.seed(init_seed)
 
-np.set_printoptions(precision=4)
-torch.set_printoptions(precision=4)
-
 
 def main(args):
     net = Solver(args)
-
-    if args.train:
-        net.train()
-    else:
-        net.traverse()
+    net.train()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='toy Factor-VAE')
+    parser = argparse.ArgumentParser(description='Factor-VAE')
 
-    parser.add_argument('--train', default=True, type=str2bool, help='train or show_factorization')
+    #parser.add_argument('--train', default=True, type=str2bool, help='train or show_factorization')
+    parser.add_argument('--name', default='main', type=str, help='')
     parser.add_argument('--cuda', default=True, type=str2bool, help='enable cuda')
     parser.add_argument('--max_iter', default=1e6, type=int, help='maximum training iteration')
     parser.add_argument('--batch_size', default=64, type=int, help='batch size')
@@ -51,13 +45,19 @@ if __name__ == "__main__":
     parser.add_argument('--image_size', default=64, type=int, help='image size. now only (64,64) is supported')
     parser.add_argument('--num_workers', default=2, type=int, help='dataloader num_workers')
 
-    parser.add_argument('--name', default='main', type=str, help='')
 
     parser.add_argument('--viz_on', default=True, type=str2bool, help='enable visdom visualization')
     parser.add_argument('--viz_port', default=8097, type=str, help='visdom port number')
+    parser.add_argument('--viz_ll_iter', default=1, type=str, help='visdom line data logging iter')
+    parser.add_argument('--viz_la_iter', default=5, type=str, help='visdom line data applying iter')
+    parser.add_argument('--viz_ra_iter', default=5, type=str, help='visdom recon image applying iter')
+    parser.add_argument('--viz_ta_iter', default=5, type=str, help='visdom traverse applying iter')
+
+    parser.add_argument('--print_iter', default=5, type=str, help='print losse iter')
 
     parser.add_argument('--ckpt_dir', default='checkpoints', type=str, help='checkpoint directory')
-    parser.add_argument('--load_ckpt', default=True, type=str2bool, help='load last checkpoint')
+    parser.add_argument('--ckpt_load', default=True, type=str2bool, help='load last checkpoint')
+    parser.add_argument('--ckpt_save_iter', default=5, type=str, help='checkpoint save iter')
 
     args = parser.parse_args()
 
