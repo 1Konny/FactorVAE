@@ -23,7 +23,7 @@ class DataGather(object):
     def flush(self):
         self.data = self.get_empty_data_dict()
 
-        
+
 def cuda(tensor, uses_cuda):
     return tensor.cuda() if uses_cuda else tensor
 
