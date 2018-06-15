@@ -48,16 +48,16 @@ if __name__ == "__main__":
 
     parser.add_argument('--viz_on', default=True, type=str2bool, help='enable visdom visualization')
     parser.add_argument('--viz_port', default=8097, type=str, help='visdom port number')
-    parser.add_argument('--viz_ll_iter', default=1, type=str, help='visdom line data logging iter')
-    parser.add_argument('--viz_la_iter', default=5, type=str, help='visdom line data applying iter')
-    parser.add_argument('--viz_ra_iter', default=5, type=str, help='visdom recon image applying iter')
-    parser.add_argument('--viz_ta_iter', default=5, type=str, help='visdom traverse applying iter')
+    parser.add_argument('--viz_ll_iter', default=1000, type=str, help='visdom line data logging iter')
+    parser.add_argument('--viz_la_iter', default=5000, type=str, help='visdom line data applying iter')
+    parser.add_argument('--viz_ra_iter', default=10000, type=str, help='visdom recon image applying iter')
+    parser.add_argument('--viz_ta_iter', default=10000, type=str, help='visdom traverse applying iter')
 
-    parser.add_argument('--print_iter', default=5, type=str, help='print losse iter')
+    parser.add_argument('--print_iter', default=500, type=str, help='print losse iter')
 
     parser.add_argument('--ckpt_dir', default='checkpoints', type=str, help='checkpoint directory')
     parser.add_argument('--ckpt_load', default=True, type=str2bool, help='load last checkpoint')
-    parser.add_argument('--ckpt_save_iter', default=5, type=str, help='checkpoint save iter')
+    parser.add_argument('--ckpt_save_iter', default=5000, type=str, help='checkpoint save iter')
 
     args = parser.parse_args()
 
