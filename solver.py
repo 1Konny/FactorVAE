@@ -12,7 +12,7 @@ from torchvision.utils import make_grid
 from torchvision import transforms
 
 from utils import cuda, mkdirs, DataGather
-from ops import original_vae_loss, permute_dims
+from ops import recon_loss, kl_divergence, permute_dims
 from model import FactorVAE_2D, FactorVAE_3D, Discriminator
 from dataset import return_data
 
@@ -95,7 +95,8 @@ class Solver(object):
 
                 x_vae = Variable(cuda(x_vae, self.use_cuda))
                 x_recon, mu, logvar, z = self.VAE(x_vae)
-                vae_recon_loss, vae_kld = original_vae_loss(x_vae, x_recon, mu, logvar)
+                vae_recon_loss = recon_loss(x_vae, x_recon)
+                vae_kld = kl_divergence(mu, logvar)
 
                 D_z = self.D(z)
                 #vae_tc_1 = F.binary_cross_entropy_with_logits(D_z, ones, -self.gamma)
@@ -215,6 +216,7 @@ class Solver(object):
                         ylabel='kl divergence',))
 
     def visualize_traverse(self):
+        self.net_mode(train=False)
         decoder = self.VAE.decode
         encoder = self.VAE.encode
         interpolation = torch.arange(-6, 6.1, 1)
@@ -247,15 +249,7 @@ class Solver(object):
                             env=self.name+'/traverse',
                             opts=dict(title=title), nrow=len(interpolation))
 
-    def net_mode(self, train):
-        if not isinstance(train, bool):
-            raise('Only bool type is supported. True or False')
-
-        for net in self.nets:
-            if train:
-                net.train()
-            else:
-                net.eval()
+        self.net_mode(train=True)
 
     def viz_init(self):
         zero_init = torch.zeros([1])
@@ -289,6 +283,16 @@ class Solver(object):
                         xlabel='iteration',
                         ylabel='kl divergence',))
 
+    def net_mode(self, train):
+        if not isinstance(train, bool):
+            raise ValueError('Only bool type is supported. True|False')
+
+        for net in self.nets:
+            if train:
+                net.train()
+            else:
+                net.eval()
+
     def save_checkpoint(self, ckptname='last', verbose=True):
         model_states = {'D':self.D.state_dict(),
                         'VAE':self.VAE.state_dict()}
@@ -298,14 +302,14 @@ class Solver(object):
                   'model_states':model_states,
                   'optim_states':optim_states}
 
-        filepath = os.path.join(self.ckpt_dir, ckptname)
+        filepath = os.path.join(self.ckpt_dir, str(ckptname))
         with open(filepath, 'wb+') as f:
             torch.save(states, f)
         if verbose:
             print("=> saved checkpoint '{}' (iter {})".format(filepath, self.global_iter))
 
     def load_checkpoint(self, ckptname='last', verbose=True):
-        filepath = os.path.join(self.ckpt_dir, ckptname)
+        filepath = os.path.join(self.ckpt_dir, str(ckptname))
         if os.path.isfile(filepath):
             with open(filepath, 'rb') as f:
                 checkpoint = torch.load(f)
