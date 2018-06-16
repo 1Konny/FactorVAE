@@ -81,6 +81,20 @@ each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 #### Latent Space Traverse (representation from random normal vector)
 ![celeba_normal_vector](misc/traverse_from_random_normal_vector_celeba.jpg)
 
+### Results - 2D Shapes(dsprites) Dataset
+#### Reconstruction
+<p align="center">
+<img src=misc/2DShapes_reconstruction_700000.jpg>
+</p>
+
+#### Latent Space Traverse
+<p align="center">
+<img src=misc/2DShapes_fixed_ellipse_700000.gif>
+<img src=misc/2DShapes_fixed_square_700000.gif>
+<img src=misc/2DShapes_fixed_heart_700000.gif>
+<img src=misc/2DShapes_random_img_700000.gif>
+</p>
+
 <br>
 
 ### Reference
