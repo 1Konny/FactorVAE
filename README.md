@@ -48,6 +48,7 @@ then data directory structure will be like below<br>
             └── 202599.jpg
     └── ...
 ```
+NOTE: I recommend to preprocess image files(e.g. resizing) BEFORE training and avoid preprocessing on-the-fly.
 <br>
 
 ### Usage

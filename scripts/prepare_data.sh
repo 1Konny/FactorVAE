@@ -1,5 +1,6 @@
 #! /bin/sh
 
+mkdir -p data
 cd data
 
 if [ "$1" = "3DChairs" ]; then
@@ -26,7 +27,7 @@ if [ "$1" = "3DChairs" ]; then
     fi
 
 elif [ "$1" = "dsprites" ]; then
-    git clone https://github.com/deepmind/dsprites-dataset.git 
+    git clone https://github.com/deepmind/dsprites-dataset.git
     cd dsprites-dataset
     rm -rf .git* *.md LICENSE *.ipynb *.gif *.hdf5
 
