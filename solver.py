@@ -4,6 +4,7 @@ import time
 import os
 import random
 import visdom
+from tqdm import tqdm
 
 import torch
 import torch.optim as optim
@@ -25,6 +26,7 @@ class Solver(object):
         self.max_iter = int(args.max_iter)
         self.print_iter = args.print_iter
         self.global_iter = 0
+        self.pbar = tqdm(total=self.max_iter)
 
         # Data
         self.dset_dir = args.dset_dir
@@ -95,9 +97,9 @@ class Solver(object):
 
         out = False
         while not out:
-            start = time.time()
             for x_true1, x_true2 in self.data_loader:
                 self.global_iter += 1
+                self.pbar.update(1)
 
                 x_true1 = Variable(cuda(x_true1, self.use_cuda))
                 x_recon, mu, logvar, z = self.VAE(x_true1)
@@ -124,7 +126,7 @@ class Solver(object):
                 self.optim_D.step()
 
                 if self.global_iter%self.print_iter == 0:
-                    print('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
+                    self.pbar.write('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
                         self.global_iter, vae_recon_loss.data[0], vae_kld.data[0], vae_tc_loss.data[0], D_tc_loss.data[0]))
 
                 if self.global_iter%self.ckpt_save_iter == 0:
@@ -159,9 +161,8 @@ class Solver(object):
                     out = True
                     break
 
-            end = time.time()
-            print('[time elapsed] {:.2f}s/epoch'.format(end-start))
-        print("[Training Finished]")
+        self.pbar.write("[Training Finished]")
+        self.pbar.close()
 
     def visualize_recon(self):
         data = self.image_gather.data
@@ -376,14 +377,14 @@ class Solver(object):
         with open(filepath, 'wb+') as f:
             torch.save(states, f)
         if verbose:
-            print("=> saved checkpoint '{}' (iter {})".format(filepath, self.global_iter))
+            self.pbar.write("=> saved checkpoint '{}' (iter {})".format(filepath, self.global_iter))
 
     def load_checkpoint(self, ckptname='last', verbose=True):
         if ckptname == 'last':
             ckpts = os.listdir(self.ckpt_dir)
             if not ckpts:
                 if verbose:
-                    print("=> no checkpoint found")
+                    self.pbar.write("=> no checkpoint found")
                 return
 
             ckpts = [int(ckpt) for ckpt in ckpts]
@@ -400,9 +401,10 @@ class Solver(object):
             self.D.load_state_dict(checkpoint['model_states']['D'])
             self.optim_VAE.load_state_dict(checkpoint['optim_states']['optim_VAE'])
             self.optim_D.load_state_dict(checkpoint['optim_states']['optim_D'])
+            self.pbar.update(self.global_iter)
 
             if verbose:
-                print("=> loaded checkpoint '{} (iter {})'".format(filepath, self.global_iter))
+                self.pbar.write("=> loaded checkpoint '{} (iter {})'".format(filepath, self.global_iter))
         else:
             if verbose:
-                print("=> no checkpoint found at '{}'".format(filepath))
+                self.pbar.write("=> no checkpoint found at '{}'".format(filepath))
