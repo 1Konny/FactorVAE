@@ -255,10 +255,10 @@ class Solver(object):
                  'fixed_heart':fixed_img_z3, 'random_img':random_img_z}
 
         elif self.dataset.lower() == 'celeba':
-            fixed_idx1 = 191281
-            fixed_idx2 = 143307
-            fixed_idx3 = 101535
-            fixed_idx4 = 70059
+            fixed_idx1 = 191281 # 'img_align_celeba/191282.jpg'
+            fixed_idx2 = 143307 # 'img_align_celeba/143308.jpg'
+            fixed_idx3 = 101535 # 'img_align_celeba/101536.jpg'
+            fixed_idx4 = 70059  # 'img_align_celeba/070060.jpg'
 
             fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
             fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
@@ -379,7 +379,18 @@ class Solver(object):
             print("=> saved checkpoint '{}' (iter {})".format(filepath, self.global_iter))
 
     def load_checkpoint(self, ckptname='last', verbose=True):
-        filepath = os.path.join(self.ckpt_dir, str(ckptname))
+        if ckptname == 'last':
+            ckpts = os.listdir(self.ckpt_dir)
+            if not ckpts:
+                if verbose:
+                    print("=> no checkpoint found")
+                return
+
+            ckpts = [int(ckpt) for ckpt in ckpts]
+            ckpts.sort(reverse=True)
+            ckptname = str(ckpts[0])
+
+        filepath = os.path.join(self.ckpt_dir, ckptname)
         if os.path.isfile(filepath):
             with open(filepath, 'rb') as f:
                 checkpoint = torch.load(f)
