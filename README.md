@@ -39,28 +39,23 @@ for example,
 ### Usage
 initialize visdom
 ```
-python -m visdom.server -p 55558
+python -m visdom.server
 ```
-you can run codes using sh files
+you can reproduce results below as follows
 ```
 e.g.
-sh run_celeba.sh
-sh run_3dchairs.sh
+sh run_celeba.sh $RUN_NAME
+sh run_dsprites.sh $RUN_NAME
 ```
 or you can run your own experiments by setting parameters manually
 ```
 e.g.
-python main.py --viz_name run1 --dataset celeba --gamma 6.4 --lr_VAE 1e-4 --lr_D 5e-5 --z_dim 10 ...
+python main.py --name run_celeba --dataset celeba --gamma 6.4 --lr_VAE 1e-4 --lr_D 5e-5 --z_dim 10 ...
 ```
 check training process on the visdom server
 ```
-localhost:55558
+localhost:8097
 ```
-after training, you can see traverse results(see below) using ```--viz_name```
-```
-python main.py --train False --viz_name run1
-```
-
 <br>
 
 ### Results - 2D Shapes(dsprites) Dataset
@@ -68,6 +63,7 @@ python main.py --train False --viz_name run1
 <p align="center">
 <img src=misc/2DShapes_reconstruction_700000.jpg>
 </p>
+
 #### Latent Space Traverse
 <p align="center">
 <img src=misc/2DShapes_fixed_ellipse_700000.gif>
@@ -82,6 +78,7 @@ python main.py --train False --viz_name run1
 <p align="center">
 <img src=misc/CelebA_reconstruction_850000.jpg>
 </p>
+
 #### Latent Space Traverse
 <p align="center">
 <img src=misc/CelebA_traverse_850000.png>
