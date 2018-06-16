@@ -234,7 +234,7 @@ class Solver(object):
 
         random_z = Variable(cuda(torch.rand(1, self.z_dim, 1, 1), self.use_cuda), volatile=True)
 
-        if self.dataset == 'dsprites':
+        if self.dataset.lower() == 'dsprites':
             fixed_idx1 = 87040 # square
             fixed_idx2 = 332800 # ellipse
             fixed_idx3 = 578560 # heart
@@ -253,9 +253,35 @@ class Solver(object):
 
             Z = {'fixed_square':fixed_img_z1, 'fixed_ellipse':fixed_img_z2,
                  'fixed_heart':fixed_img_z3, 'random_img':random_img_z}
+
+        elif self.dataset.lower() == 'celeba':
+            fixed_idx1 = 191281
+            fixed_idx2 = 143307
+            fixed_idx3 = 101535
+            fixed_idx4 = 70059
+
+            fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
+            fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z1 = encoder(fixed_img1)[:, :self.z_dim]
+
+            fixed_img2 = self.data_loader.dataset.__getitem__(fixed_idx2)[0]
+            fixed_img2 = Variable(cuda(fixed_img2, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z2 = encoder(fixed_img2)[:, :self.z_dim]
+
+            fixed_img3 = self.data_loader.dataset.__getitem__(fixed_idx3)[0]
+            fixed_img3 = Variable(cuda(fixed_img3, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z3 = encoder(fixed_img3)[:, :self.z_dim]
+
+            fixed_img4 = self.data_loader.dataset.__getitem__(fixed_idx4)[0]
+            fixed_img4 = Variable(cuda(fixed_img4, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z4 = encoder(fixed_img4)[:, :self.z_dim]
+
+            Z = {'fixed_1':fixed_img_z1, 'fixed_2':fixed_img_z2,
+                 'fixed_3':fixed_img_z3, 'fixed_4':fixed_img_z4,
+                 'random':random_img_z}
         else:
             fixed_idx = 0
-            fixed_img = self.data_loader.dataset.__getitem__(fixed_idx)
+            fixed_img = self.data_loader.dataset.__getitem__(fixed_idx)[0]
             fixed_img = Variable(cuda(fixed_img, self.use_cuda), volatile=True).unsqueeze(0)
             fixed_img_z = encoder(fixed_img)[:, :self.z_dim]
 
