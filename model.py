@@ -26,10 +26,15 @@ class Discriminator(nn.Module):
         )
         self.weight_init()
 
-    def weight_init(self):
+    def weight_init(self, mode='normal'):
+        if mode == 'kaiming':
+            initializer = kaiming_init
+        elif mode == 'normal':
+            initializer = normal_init
+
         for block in self._modules:
             for m in self._modules[block]:
-                kaiming_init(m)
+                initializer(m)
 
     def forward(self, z):
         return self.net(z).squeeze()
@@ -68,10 +73,15 @@ class FactorVAE1(nn.Module):
         )
         self.weight_init()
 
-    def weight_init(self):
+    def weight_init(self, mode='normal'):
+        if mode == 'kaiming':
+            initializer = kaiming_init
+        elif mode == 'normal':
+            initializer = normal_init
+
         for block in self._modules:
             for m in self._modules[block]:
-                kaiming_init(m)
+                initializer(m)
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
@@ -124,10 +134,15 @@ class FactorVAE2(nn.Module):
         )
         self.weight_init()
 
-    def weight_init(self):
+    def weight_init(self, mode='normal'):
+        if mode == 'kaiming':
+            initializer = kaiming_init
+        elif mode == 'normal':
+            initializer = normal_init
+
         for block in self._modules:
             for m in self._modules[block]:
-                kaiming_init(m)
+                initializer(m)
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
@@ -180,10 +195,15 @@ class FactorVAE3(nn.Module):
         )
         self.weight_init()
 
-    def weight_init(self):
+    def weight_init(self, mode='normal'):
+        if mode == 'kaiming':
+            initializer = kaiming_init
+        elif mode == 'normal':
+            initializer = normal_init
+
         for block in self._modules:
             for m in self._modules[block]:
-                kaiming_init(m)
+                initializer(m)
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
@@ -206,6 +226,17 @@ class FactorVAE3(nn.Module):
 def kaiming_init(m):
     if isinstance(m, (nn.Linear, nn.Conv2d)):
         init.kaiming_normal(m.weight)
+        if m.bias is not None:
+            m.bias.data.fill_(0)
+    elif isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
+        m.weight.data.fill_(1)
+        if m.bias is not None:
+            m.bias.data.fill_(0)
+
+
+def normal_init(m):
+    if isinstance(m, (nn.Linear, nn.Conv2d)):
+        init.normal(m.weight, 0, 0.02)
         if m.bias is not None:
             m.bias.data.fill_(0)
     elif isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
