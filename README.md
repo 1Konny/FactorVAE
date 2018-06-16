@@ -63,6 +63,36 @@ python main.py --train False --viz_name run1
 
 <br>
 
+### Results - 2D Shapes(dsprites) Dataset
+#### Reconstruction
+<p align="center">
+<img src=misc/2DShapes_reconstruction_700000.jpg>
+</p>
+#### Latent Space Traverse
+<p align="center">
+<img src=misc/2DShapes_fixed_ellipse_700000.gif>
+<img src=misc/2DShapes_fixed_square_700000.gif>
+<img src=misc/2DShapes_fixed_heart_700000.gif>
+<img src=misc/2DShapes_random_img_700000.gif>
+</p>
+<br>
+
+### Results - CelebA Dataset
+#### Reconstruction
+<p align="center">
+<img src=misc/CelebA_reconstruction_850000.jpg>
+</p>
+#### Latent Space Traverse
+<p align="center">
+<img src=misc/Celeb_traverse_850000.png>
+<img src=misc/CelebA_fixed_1_850000.gif>
+<img src=misc/CelebA_fixed_2_850000.gif>
+<img src=misc/CelebA_fixed_3_850000.gif>
+<img src=misc/CelebA_fixed_4_850000.gif>
+</p>
+<br>
+
+
 ### Results - 3D Chairs Dataset
 each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 
@@ -74,28 +104,6 @@ each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
 ![3dchairs_traverse_zero_vector](misc/3dchairs_traverse_zero_vector.jpg)
 #### Latent Space Traverse 4(representation from normal distribution)
 ![3dchairs_traverse_normal_dist](misc/3dchairs_traverse_normal_dist.jpg)
-
-### Results - CelebA Dataset
-each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
-
-#### Latent Space Traverse (representation from random normal vector)
-![celeba_normal_vector](misc/traverse_from_random_normal_vector_celeba.jpg)
-
-### Results - 2D Shapes(dsprites) Dataset
-#### Reconstruction
-<p align="center">
-<img src=misc/2DShapes_reconstruction_700000.jpg>
-</p>
-
-#### Latent Space Traverse
-<p align="center">
-<img src=misc/2DShapes_fixed_ellipse_700000.gif>
-<img src=misc/2DShapes_fixed_square_700000.gif>
-<img src=misc/2DShapes_fixed_heart_700000.gif>
-<img src=misc/2DShapes_random_img_700000.gif>
-</p>
-
-<br>
 
 ### Reference
 1. Disentangling by Factorising, Kim et al.([http://arxiv.org/abs/1802.05983])
