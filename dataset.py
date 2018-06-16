@@ -76,7 +76,7 @@ def return_data(args):
         dset = CustomImageFolder
     elif name.lower() == 'dsprites':
         root = os.path.join(dset_dir, 'dsprites-dataset/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz')
-        if not root.exists():
+        if not os.path.exists(root):
             import subprocess
             print('Now download dsprites-dataset')
             subprocess.call(['./download_dsprites.sh'])
@@ -98,5 +98,4 @@ def return_data(args):
                               drop_last=True)
 
     data_loader = train_loader
-
     return data_loader
