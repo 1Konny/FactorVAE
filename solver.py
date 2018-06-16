@@ -83,6 +83,7 @@ class Solver(object):
         if args.ckpt_load:
             self.load_checkpoint(args.ckpt_load)
 
+        # Output(latent traverse GIF)
         self.output_dir = os.path.join(args.output_dir, args.name)
         self.output_save = args.output_save
         mkdirs(self.output_dir)
@@ -227,9 +228,8 @@ class Solver(object):
         interpolation = torch.arange(-limit, limit+0.1, inter)
 
         n_dsets = len(self.data_loader.dataset)
-        rand_idx = random.randint(1, n_dsets-1)
 
-        random_img = self.data_loader.dataset.__getitem__(rand_idx)[1]
+        random_img = self.data_loader.dataset.__getitem__(0)[1]
         random_img = Variable(cuda(random_img, self.use_cuda), volatile=True).unsqueeze(0)
         random_img_z = encoder(random_img)[:, :self.z_dim]
 
@@ -256,10 +256,36 @@ class Solver(object):
                  'fixed_heart':fixed_img_z3, 'random_img':random_img_z}
 
         elif self.dataset.lower() == 'celeba':
-            fixed_idx1 = 191281 # 'img_align_celeba/191282.jpg'
-            fixed_idx2 = 143307 # 'img_align_celeba/143308.jpg'
-            fixed_idx3 = 101535 # 'img_align_celeba/101536.jpg'
-            fixed_idx4 = 70059  # 'img_align_celeba/070060.jpg'
+            fixed_idx1 = 191281 # 'CelebA/img_align_celeba/191282.jpg'
+            fixed_idx2 = 143307 # 'CelebA/img_align_celeba/143308.jpg'
+            fixed_idx3 = 101535 # 'CelebA/img_align_celeba/101536.jpg'
+            fixed_idx4 = 70059  # 'CelebA/img_align_celeba/070060.jpg'
+
+            fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
+            fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z1 = encoder(fixed_img1)[:, :self.z_dim]
+
+            fixed_img2 = self.data_loader.dataset.__getitem__(fixed_idx2)[0]
+            fixed_img2 = Variable(cuda(fixed_img2, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z2 = encoder(fixed_img2)[:, :self.z_dim]
+
+            fixed_img3 = self.data_loader.dataset.__getitem__(fixed_idx3)[0]
+            fixed_img3 = Variable(cuda(fixed_img3, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z3 = encoder(fixed_img3)[:, :self.z_dim]
+
+            fixed_img4 = self.data_loader.dataset.__getitem__(fixed_idx4)[0]
+            fixed_img4 = Variable(cuda(fixed_img4, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img_z4 = encoder(fixed_img4)[:, :self.z_dim]
+
+            Z = {'fixed_1':fixed_img_z1, 'fixed_2':fixed_img_z2,
+                 'fixed_3':fixed_img_z3, 'fixed_4':fixed_img_z4,
+                 'random':random_img_z}
+
+        elif self.dataset.lower() == '3dchairs':
+            fixed_idx1 = 141 # 3DChairs/images/10128_image_020_p020_t232_r096.png
+            fixed_idx2 = 5172 # 3DChairs/images/14657_image_020_p020_t232_r096.png
+            fixed_idx3 = 5494 # 3DChairs/images/14947_image_020_p020_t232_r096.png
+            fixed_idx4 = 65475 # 3DChairs/images/68930_image_019_p020_t220_r096.png
 
             fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
             fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
