@@ -1,8 +1,8 @@
 """dataset.py"""
 
+import os
 import random
 import numpy as np
-from pathlib import Path
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -67,15 +67,15 @@ def return_data(args):
         transforms.ToTensor(),])
 
     if name.lower() == 'celeba':
-        root = Path(dset_dir).joinpath('CelebA')
+        root = os.path.join(dset_dir, 'CelebA')
         train_kwargs = {'root':root, 'transform':transform}
         dset = CustomImageFolder
     elif name.lower() == '3dchairs':
-        root = Path(dset_dir).joinpath('3DChairs')
+        root = os.path.join(dset_dir, '3DChairs')
         train_kwargs = {'root':root, 'transform':transform}
         dset = CustomImageFolder
     elif name.lower() == 'dsprites':
-        root = Path(dset_dir).joinpath('dsprites-dataset/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz')
+        root = os.path.join(dset_dir, 'dsprites-dataset/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz')
         if not root.exists():
             import subprocess
             print('Now download dsprites-dataset')
