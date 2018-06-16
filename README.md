@@ -44,8 +44,9 @@ python -m visdom.server
 you can reproduce results below as follows
 ```
 e.g.
-sh run_celeba.sh $RUN_NAME
-sh run_dsprites.sh $RUN_NAME
+sh scripts/run_celeba.sh $RUN_NAME
+sh scripts/run_dsprites.sh $RUN_NAME
+sh scripts/run_3dchairs.sh $RUN_NAME
 ```
 or you can run your own experiments by setting parameters manually
 ```

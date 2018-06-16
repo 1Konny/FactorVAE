@@ -79,7 +79,7 @@ def return_data(args):
         if not os.path.exists(root):
             import subprocess
             print('Now download dsprites-dataset')
-            subprocess.call(['./download_dsprites.sh'])
+            subprocess.call(['./scripts/download_dsprites.sh'])
             print('Finished')
         data = np.load(root, encoding='latin1')
         data = torch.from_numpy(data['imgs']).unsqueeze(1).float()
