@@ -84,7 +84,7 @@ python main.py --train False --viz_name run1
 </p>
 #### Latent Space Traverse
 <p align="center">
-<img src=misc/Celeb_traverse_850000.png>
+<img src=misc/CelebA_traverse_850000.png>
 <img src=misc/CelebA_fixed_1_850000.gif>
 <img src=misc/CelebA_fixed_2_850000.gif>
 <img src=misc/CelebA_fixed_3_850000.gif>
