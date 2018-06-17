@@ -108,21 +108,20 @@ localhost:8097
 
 
 ### Results - 3D Chairs Dataset
-each row represents each dimension of latent vector z(i.e. z_j, j=1, ..., 10)
+#### Reconstruction
+<p align="center">
+<img src=misc/3DChairs_reconstruction_1000000.jpg>
+</p>
 
-#### Latent Space Traverse 1(representation from true image 1)
-![3dchairs_traverse_img1](misc/3dchairs_traverse_img1.jpg)
-#### Latent Space Traverse 2(representation from true image 2)
-![3dchairs_traverse_img2](misc/3dchairs_traverse_img2.jpg)
-#### Latent Space Traverse 3(representation from zero vector)
-![3dchairs_traverse_zero_vector](misc/3dchairs_traverse_zero_vector.jpg)
-#### Latent Space Traverse 4(representation from normal distribution)
-![3dchairs_traverse_normal_dist](misc/3dchairs_traverse_normal_dist.jpg)
+#### Latent Space Traverse
+<p align="center">
+<img src=misc/3DChairs_traverse_1000000.png>
+</p>
+<br>
 
 ### Reference
 1. Disentangling by Factorising, Kim et al.([http://arxiv.org/abs/1802.05983])
 
 
 [http://arxiv.org/abs/1802.05983]: http://arxiv.org/abs/1802.05983
-[click to download]: https://www.di.ens.fr/willow/research/seeing3Dchairs/data/rendered_chairs.tar
-[website]: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
+[download]: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
