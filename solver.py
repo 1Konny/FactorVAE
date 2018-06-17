@@ -156,7 +156,10 @@ class Solver(object):
                     self.image_gather.flush()
 
                 if self.viz_on and (self.global_iter%self.viz_ta_iter == 0):
-                    self.visualize_traverse()
+                    if self.dataset.lower() == '3dchairs':
+                        self.visualize_traverse(limit=2, inter=0.5)
+                    else:
+                        self.visualize_traverse(limit=3, inter=2/3)
 
                 if self.global_iter >= self.max_iter:
                     out = True
@@ -282,10 +285,9 @@ class Solver(object):
                  'random':random_img_z}
 
         elif self.dataset.lower() == '3dchairs':
-            fixed_idx1 = 141 # 3DChairs/images/10128_image_020_p020_t232_r096.png
-            fixed_idx2 = 5172 # 3DChairs/images/14657_image_020_p020_t232_r096.png
-            fixed_idx3 = 5494 # 3DChairs/images/14947_image_020_p020_t232_r096.png
-            fixed_idx4 = 65475 # 3DChairs/images/68930_image_019_p020_t220_r096.png
+            fixed_idx1 = 40919 # 3DChairs/images/4682_image_052_p030_t232_r096.png
+            fixed_idx2 = 5172  # 3DChairs/images/14657_image_020_p020_t232_r096.png
+            fixed_idx3 = 22330 # 3DChairs/images/30099_image_052_p030_t232_r096.png
 
             fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
             fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
@@ -299,13 +301,8 @@ class Solver(object):
             fixed_img3 = Variable(cuda(fixed_img3, self.use_cuda), volatile=True).unsqueeze(0)
             fixed_img_z3 = encoder(fixed_img3)[:, :self.z_dim]
 
-            fixed_img4 = self.data_loader.dataset.__getitem__(fixed_idx4)[0]
-            fixed_img4 = Variable(cuda(fixed_img4, self.use_cuda), volatile=True).unsqueeze(0)
-            fixed_img_z4 = encoder(fixed_img4)[:, :self.z_dim]
-
             Z = {'fixed_1':fixed_img_z1, 'fixed_2':fixed_img_z2,
-                 'fixed_3':fixed_img_z3, 'fixed_4':fixed_img_z4,
-                 'random':random_img_z}
+                 'fixed_3':fixed_img_z3, 'random':random_img_z}
         else:
             fixed_idx = 0
             fixed_img = self.data_loader.dataset.__getitem__(fixed_idx)[0]
