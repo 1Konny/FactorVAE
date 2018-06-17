@@ -61,7 +61,8 @@ you can reproduce results below as follows
 ```
 e.g.
 sh scripts/run_celeba.sh $RUN_NAME
-sh scripts/run_dsprites.sh $RUN_NAME
+sh scripts/run_dsprites_gamma6p4.sh $RUN_NAME
+sh scripts/run_dsprites_gamma10.sh $RUN_NAME
 sh scripts/run_3dchairs.sh $RUN_NAME
 ```
 or you can run your own experiments by setting parameters manually
@@ -76,19 +77,27 @@ localhost:8097
 <br>
 
 ### Results - 2D Shapes(dsprites) Dataset
-#### Reconstruction
+#### Reconstruction($\gamma$=6.4)
 <p align="center">
-<img src=misc/2DShapes_reconstruction_700000.jpg>
+<img src=misc/2DShapes_reconstruction_gamma6p4_700000.jpg>
 </p>
 
-#### Latent Space Traverse
+#### Latent Space Traverse($\gamma$=6.4)
 <p align="center">
-<img src=misc/2DShapes_fixed_ellipse_700000.gif>
-<img src=misc/2DShapes_fixed_square_700000.gif>
-<img src=misc/2DShapes_fixed_heart_700000.gif>
-<img src=misc/2DShapes_random_img_700000.gif>
+<img src=misc/2DShapes_fixed_ellipse_gamma6p4_700000.gif>
+<img src=misc/2DShapes_fixed_square_gamma6p4_700000.gif>
+<img src=misc/2DShapes_fixed_heart_gamma6p4_700000.gif>
+<img src=misc/2DShapes_random_img_gamma6p4_700000.gif>
 </p>
 <br>
+
+#### Latent Space Traverse($\gamma$=10)
+<p align="center">
+<img src=misc/2DShapes_fixed_ellipse_gamma10_1000000.gif>
+<img src=misc/2DShapes_fixed_square_gamma10_1000000.gif>
+<img src=misc/2DShapes_fixed_heart_gamma10_1000000.gif>
+<img src=misc/2DShapes_random_img_gamma10_1000000.gif>
+</p>
 
 ### Results - CelebA Dataset
 #### Reconstruction
