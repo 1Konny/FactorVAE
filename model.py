@@ -1,10 +1,7 @@
 """model.py"""
 
-import torch
 import torch.nn as nn
-#import torch.nn.functional as F
 import torch.nn.init as init
-from torch.autograd import Variable
 
 
 class Discriminator(nn.Module):
@@ -85,7 +82,7 @@ class FactorVAE1(nn.Module):
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
-        eps = Variable(std.data.new(std.size()).normal_())
+        eps = std.data.new(std.size()).normal_()
         return eps.mul(std).add_(mu)
 
     def forward(self, x, no_dec=False):
@@ -146,7 +143,7 @@ class FactorVAE2(nn.Module):
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
-        eps = Variable(std.data.new(std.size()).normal_())
+        eps = std.data.new(std.size()).normal_()
         return eps.mul(std).add_(mu)
 
     def forward(self, x, no_dec=False):
@@ -207,7 +204,7 @@ class FactorVAE3(nn.Module):
 
     def reparametrize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
-        eps = Variable(std.data.new(std.size()).normal_())
+        eps = std.data.new(std.size()).normal_()
         return eps.mul(std).add_(mu)
 
     def forward(self, x, no_dec=False):
@@ -225,7 +222,7 @@ class FactorVAE3(nn.Module):
 
 def kaiming_init(m):
     if isinstance(m, (nn.Linear, nn.Conv2d)):
-        init.kaiming_normal(m.weight)
+        init.kaiming_normal_(m.weight)
         if m.bias is not None:
             m.bias.data.fill_(0)
     elif isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
@@ -236,7 +233,7 @@ def kaiming_init(m):
 
 def normal_init(m):
     if isinstance(m, (nn.Linear, nn.Conv2d)):
-        init.normal(m.weight, 0, 0.02)
+        init.normal_(m.weight, 0, 0.02)
         if m.bias is not None:
             m.bias.data.fill_(0)
     elif isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
