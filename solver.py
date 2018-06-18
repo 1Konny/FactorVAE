@@ -7,10 +7,9 @@ from tqdm import tqdm
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.autograd import Variable
 from torchvision.utils import make_grid, save_image
 
-from utils import DataGather, cuda, mkdirs, grid2gif
+from utils import DataGather, mkdirs, grid2gif
 from ops import recon_loss, kl_divergence, permute_dims
 from model import FactorVAE1, FactorVAE2, Discriminator
 from dataset import return_data
@@ -19,7 +18,8 @@ from dataset import return_data
 class Solver(object):
     def __init__(self, args):
         # Misc
-        self.use_cuda = args.cuda and torch.cuda.is_available()
+        use_cuda = args.cuda and torch.cuda.is_available()
+        self.device = 'cuda' if use_cuda else 'cpu'
         self.name = args.name
         self.max_iter = int(args.max_iter)
         self.print_iter = args.print_iter
@@ -45,15 +45,15 @@ class Solver(object):
         self.beta2_D = args.beta2_D
 
         if args.dataset == 'dsprites':
-            self.VAE = cuda(FactorVAE1(self.z_dim), self.use_cuda)
+            self.VAE = FactorVAE1(self.z_dim).to(self.device)
             self.nc = 1
         else:
-            self.VAE = cuda(FactorVAE2(self.z_dim), self.use_cuda)
+            self.VAE = FactorVAE2(self.z_dim).to(self.device)
             self.nc = 3
         self.optim_VAE = optim.Adam(self.VAE.parameters(), lr=self.lr_VAE,
                                     betas=(self.beta1_VAE, self.beta2_VAE))
 
-        self.D = cuda(Discriminator(self.z_dim), self.use_cuda)
+        self.D = Discriminator(self.z_dim).to(self.device)
         self.optim_D = optim.Adam(self.D.parameters(), lr=self.lr_D,
                                   betas=(self.beta1_D, self.beta2_D))
 
@@ -89,10 +89,8 @@ class Solver(object):
     def train(self):
         self.net_mode(train=True)
 
-        ones = cuda(torch.ones(self.batch_size).long(), self.use_cuda)
-        ones = Variable(ones, volatile=True)
-        zeros = cuda(torch.zeros(self.batch_size).long(), self.use_cuda)
-        zeros = Variable(zeros, volatile=True)
+        ones = torch.ones(self.batch_size, dtype=torch.long, device=self.device)
+        zeros = torch.zeros(self.batch_size, dtype=torch.long, device=self.device)
 
         out = False
         while not out:
@@ -100,7 +98,7 @@ class Solver(object):
                 self.global_iter += 1
                 self.pbar.update(1)
 
-                x_true1 = Variable(cuda(x_true1, self.use_cuda))
+                x_true1 = x_true1.to(self.device)
                 x_recon, mu, logvar, z = self.VAE(x_true1)
                 vae_recon_loss = recon_loss(x_true1, x_recon)
                 vae_kld = kl_divergence(mu, logvar)
@@ -114,7 +112,7 @@ class Solver(object):
                 vae_loss.backward(retain_graph=True)
                 self.optim_VAE.step()
 
-                x_true2 = Variable(cuda(x_true2, self.use_cuda))
+                x_true2 = x_true2.to(self.device)
                 z_prime = self.VAE(x_true2, no_dec=True)
                 z_pperm = permute_dims(z_prime).detach()
                 D_z_pperm = self.D(z_pperm)
@@ -126,7 +124,7 @@ class Solver(object):
 
                 if self.global_iter%self.print_iter == 0:
                     self.pbar.write('[{}] vae_recon_loss:{:.3f} vae_kld:{:.3f} vae_tc_loss:{:.3f} D_tc_loss:{:.3f}'.format(
-                        self.global_iter, vae_recon_loss.data[0], vae_kld.data[0], vae_tc_loss.data[0], D_tc_loss.data[0]))
+                        self.global_iter, vae_recon_loss.item(), vae_kld.item(), vae_tc_loss.item(), D_tc_loss.item()))
 
                 if self.global_iter%self.ckpt_save_iter == 0:
                     self.save_checkpoint(self.global_iter)
@@ -137,11 +135,11 @@ class Solver(object):
                     D_acc = ((soft_D_z >= 0.5).sum() + (soft_D_z_pperm < 0.5).sum()).float()
                     D_acc /= 2*self.batch_size
                     self.line_gather.insert(iter=self.global_iter,
-                                            soft_D_z=soft_D_z.mean().data[0],
-                                            soft_D_z_pperm=soft_D_z_pperm.mean().data[0],
-                                            recon=vae_recon_loss.data[0],
-                                            kld=vae_kld.data[0],
-                                            acc=D_acc.data[0])
+                                            soft_D_z=soft_D_z.mean().item(),
+                                            soft_D_z_pperm=soft_D_z_pperm.mean().item(),
+                                            recon=vae_recon_loss.item(),
+                                            kld=vae_kld.item(),
+                                            acc=D_acc.item())
 
                 if self.viz_on and (self.global_iter%self.viz_la_iter == 0):
                     self.visualize_line()
@@ -229,10 +227,8 @@ class Solver(object):
         interpolation = torch.arange(-limit, limit+0.1, inter)
 
         random_img = self.data_loader.dataset.__getitem__(0)[1]
-        random_img = Variable(cuda(random_img, self.use_cuda), volatile=True).unsqueeze(0)
+        random_img = random_img.to(self.device).unsqueeze(0)
         random_img_z = encoder(random_img)[:, :self.z_dim]
-
-        random_z = Variable(cuda(torch.rand(1, self.z_dim, 1, 1), self.use_cuda), volatile=True)
 
         if self.dataset.lower() == 'dsprites':
             fixed_idx1 = 87040 # square
@@ -240,15 +236,15 @@ class Solver(object):
             fixed_idx3 = 578560 # heart
 
             fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
-            fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img1 = fixed_img1.to(self.device).unsqueeze(0)
             fixed_img_z1 = encoder(fixed_img1)[:, :self.z_dim]
 
             fixed_img2 = self.data_loader.dataset.__getitem__(fixed_idx2)[0]
-            fixed_img2 = Variable(cuda(fixed_img2, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img2 = fixed_img2.to(self.device).unsqueeze(0)
             fixed_img_z2 = encoder(fixed_img2)[:, :self.z_dim]
 
             fixed_img3 = self.data_loader.dataset.__getitem__(fixed_idx3)[0]
-            fixed_img3 = Variable(cuda(fixed_img3, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img3 = fixed_img3.to(self.device).unsqueeze(0)
             fixed_img_z3 = encoder(fixed_img3)[:, :self.z_dim]
 
             Z = {'fixed_square':fixed_img_z1, 'fixed_ellipse':fixed_img_z2,
@@ -261,19 +257,19 @@ class Solver(object):
             fixed_idx4 = 70059  # 'CelebA/img_align_celeba/070060.jpg'
 
             fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
-            fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img1 = fixed_img1.to(self.device).unsqueeze(0)
             fixed_img_z1 = encoder(fixed_img1)[:, :self.z_dim]
 
             fixed_img2 = self.data_loader.dataset.__getitem__(fixed_idx2)[0]
-            fixed_img2 = Variable(cuda(fixed_img2, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img2 = fixed_img2.to(self.device).unsqueeze(0)
             fixed_img_z2 = encoder(fixed_img2)[:, :self.z_dim]
 
             fixed_img3 = self.data_loader.dataset.__getitem__(fixed_idx3)[0]
-            fixed_img3 = Variable(cuda(fixed_img3, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img3 = fixed_img3.to(self.device).unsqueeze(0)
             fixed_img_z3 = encoder(fixed_img3)[:, :self.z_dim]
 
             fixed_img4 = self.data_loader.dataset.__getitem__(fixed_idx4)[0]
-            fixed_img4 = Variable(cuda(fixed_img4, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img4 = fixed_img4.to(self.device).unsqueeze(0)
             fixed_img_z4 = encoder(fixed_img4)[:, :self.z_dim]
 
             Z = {'fixed_1':fixed_img_z1, 'fixed_2':fixed_img_z2,
@@ -286,15 +282,15 @@ class Solver(object):
             fixed_idx3 = 22330 # 3DChairs/images/30099_image_052_p030_t232_r096.png
 
             fixed_img1 = self.data_loader.dataset.__getitem__(fixed_idx1)[0]
-            fixed_img1 = Variable(cuda(fixed_img1, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img1 = fixed_img1.to(self.device).unsqueeze(0)
             fixed_img_z1 = encoder(fixed_img1)[:, :self.z_dim]
 
             fixed_img2 = self.data_loader.dataset.__getitem__(fixed_idx2)[0]
-            fixed_img2 = Variable(cuda(fixed_img2, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img2 = fixed_img2.to(self.device).unsqueeze(0)
             fixed_img_z2 = encoder(fixed_img2)[:, :self.z_dim]
 
             fixed_img3 = self.data_loader.dataset.__getitem__(fixed_idx3)[0]
-            fixed_img3 = Variable(cuda(fixed_img3, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img3 = fixed_img3.to(self.device).unsqueeze(0)
             fixed_img_z3 = encoder(fixed_img3)[:, :self.z_dim]
 
             Z = {'fixed_1':fixed_img_z1, 'fixed_2':fixed_img_z2,
@@ -302,8 +298,10 @@ class Solver(object):
         else:
             fixed_idx = 0
             fixed_img = self.data_loader.dataset.__getitem__(fixed_idx)[0]
-            fixed_img = Variable(cuda(fixed_img, self.use_cuda), volatile=True).unsqueeze(0)
+            fixed_img = fixed_img.to(self.device).unsqueeze(0)
             fixed_img_z = encoder(fixed_img)[:, :self.z_dim]
+
+            random_z = torch.rand(1, self.z_dim, 1, 1, device=self.device)
 
             Z = {'fixed_img':fixed_img_z, 'random_img':random_img_z, 'random_z':random_z}
 
@@ -421,7 +419,6 @@ class Solver(object):
             self.optim_VAE.load_state_dict(checkpoint['optim_states']['optim_VAE'])
             self.optim_D.load_state_dict(checkpoint['optim_states']['optim_D'])
             self.pbar.update(self.global_iter)
-
             if verbose:
                 self.pbar.write("=> loaded checkpoint '{} (iter {})'".format(filepath, self.global_iter))
         else:

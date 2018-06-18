@@ -21,10 +21,7 @@ def permute_dims(z):
     B, _ = z.size()
     perm_z = []
     for z_j in z.split(1, 1):
-        perm = torch.randperm(B)
-        if z.is_cuda:
-            perm = perm.cuda()
-
+        perm = torch.randperm(B).to(z.device)
         perm_z_j = z_j[perm]
         perm_z.append(perm_z_j)
 

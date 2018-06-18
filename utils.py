@@ -21,10 +21,6 @@ class DataGather(object):
         self.data = self.get_empty_data_dict()
 
 
-def cuda(tensor, uses_cuda):
-    return tensor.cuda() if uses_cuda else tensor
-
-
 def str2bool(v):
     # codes from : https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
 
