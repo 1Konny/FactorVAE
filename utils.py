@@ -4,10 +4,6 @@ import os
 import argparse
 import subprocess
 
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
-
 
 class DataGather(object):
     def __init__(self, *args):
@@ -38,16 +34,6 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-def where(cond, x, y):
-    """Do same operation as np.where
-
-    code from:
-        https://discuss.pytorch.org/t/how-can-i-do-the-operation-the-same-as-np-where/1329/8
-    """
-    cond = cond.float()
-    return (cond*x) + ((1-cond)*y)
 
 
 def grid2gif(image_str, output_gif, delay=100):

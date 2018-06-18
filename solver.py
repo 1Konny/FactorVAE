@@ -1,8 +1,6 @@
 """solver.py"""
 
-import time
 import os
-import random
 import visdom
 from tqdm import tqdm
 
@@ -229,8 +227,6 @@ class Solver(object):
         decoder = self.VAE.decode
         encoder = self.VAE.encode
         interpolation = torch.arange(-limit, limit+0.1, inter)
-
-        n_dsets = len(self.data_loader.dataset)
 
         random_img = self.data_loader.dataset.__getitem__(0)[1]
         random_img = Variable(cuda(random_img, self.use_cuda), volatile=True).unsqueeze(0)
