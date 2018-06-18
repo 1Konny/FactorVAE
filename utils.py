@@ -4,6 +4,7 @@ import os
 import argparse
 import subprocess
 
+
 class DataGather(object):
     def __init__(self, *args):
         self.keys = args
